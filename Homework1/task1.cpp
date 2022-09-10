@@ -1,5 +1,5 @@
 #include <iostream>
-#include "utils.h"
+#include "utils.hpp"
 
 int main(){
   using std::cout;
@@ -26,5 +26,5 @@ int main(){
   cout << "Plus(" << x << ", " << y << ") = " << Plus(x,y) << endl;
 
   return 0;
-  
+
 }
