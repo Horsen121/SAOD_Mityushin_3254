@@ -34,13 +34,14 @@ public:
         return *this;
     }
     inline Str& operator +=(const char *sz){
-        if (sz) {
-            Str tmp(*this);
-            int len = strlen(sz) + strlen(m_pszText);
-            m_pszText = new char[len + 1];
-            strcpy(m_pszText, tmp.m_pszText);
-            strcpy(m_pszText + strlen(tmp.m_pszText), sz);
-        }
+        if (sz) return *this;
+        Str tmp(*this);
+        int len = strlen(sz) + strlen(m_pszText);
+        delete [] m_pszText;
+        m_pszText = new char[len + 1];
+        strcpy(m_pszText, tmp.m_pszText);
+        strcpy(m_pszText + strlen(tmp.m_pszText), sz);
+
         return *this;
     }
     inline Str operator +(const char *sz) const{

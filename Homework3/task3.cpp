@@ -20,13 +20,19 @@ int main(){
     cout << "Arg" << c << " = " << c.Arg() << endl;
 
     Complex v[4]{ Complex (1,1), Complex (2,3), Complex (4,5), Complex (6,0) };
-    for(int i = 0; i<5; i++)
+    for(int i = 0; i<4; i++)
         cout<<v[i] << ' ';
      cout<<endl;
 
     Complex *pc = &c;
     cout << "*pc = " << *pc << endl;
-    cout << "Complex(1) = " << *(new Complex(1)) << "  Complex = " << *(new Complex) << "  Complex(1,2) = " << *(new Complex(1,2)) << endl;
+    Complex *c1 = new Complex(1);
+    Complex *c2 = new Complex;
+    Complex *c3 = new Complex(1,2);
+    cout << "Complex(1) = " << c1 << "  Complex = " << c2 << "  Complex(1,2) = " << c3 << endl;
+    delete c1;
+    delete c2;
+    delete c3;
     cout << "Re = " << pc->Re << "  Im = " << pc->Im << endl;
 
     return 0;

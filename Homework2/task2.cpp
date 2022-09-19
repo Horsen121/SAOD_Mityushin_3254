@@ -35,23 +35,29 @@ int main(){
     //    cout<<a[i] << ' ';
     // cout<<endl; 
     for (int *p = a; p-a<5; p++)
-		cout << *p << ' ';
-	cout << endl;
+		cout << *p << " ";
+	  cout << endl;
     Rotate(a, sizeof(a)/sizeof(*a), true);
     for (int *p = a; p-a<5; p++)
-		cout << *p << ' ';
+		cout << *p << " ";
     cout << endl;
     Rotate(b, sizeof(b)/sizeof(*b), false);
     for (int *p = b; p-b<5; p++)
-		cout << *p << ' ';
+		cout << *p << " ";
     cout << endl;
 
 
     char str[] = "Hello!";
-	//cout << str << endl;
+	  //cout << str << endl;
     //cout << strlen(str) << ' ' << sizeof(str) << endl;
     char t[32];
+    for(int i=0; i<32; i++){
+      t[i]=0;
+    }
     char empt[32];
+    for(int i=0; i<32; i++){
+      empt[i]=0;
+    }
     char longstr[32] = "Long str";
     for (char *pd = t, *ps = str; *pd++ = *ps++;)
     String_copy(t, str);
