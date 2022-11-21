@@ -43,7 +43,7 @@ int main(int argc, char* argv[]){
             input.close();
 
             // create encoded_file
-            ofstream output(argv[3]); //, ios_base::binary|ios::out
+            fstream output(argv[3]); //, ios_base::binary|ios::out
             if(!output.is_open()){
                 cout << "Fatal error! Encoded file don't created." << endl;
                 exit(-1);
@@ -59,7 +59,8 @@ int main(int argc, char* argv[]){
             size_t time = chrono::duration_cast<chrono::milliseconds>(time_two - time_one).count();
 
             cout << "Done!" << endl;
-            cout << "Compression ratio: " << sizeof(input) << " bytes / " << sizeof(output) << " bytes = " << sizeof(input)/sizeof(output) << endl;
+            size_t size_i = input.tellg(), size_o = output.tellg();
+            cout << "Compression ratio: " << size_i << " bytes / " << size_o << " bytes = " << size_i/size_o << endl;
             cout << "Compression time: " << time << " sec" << endl << endl;
 
         //     exit(0);
