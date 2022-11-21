@@ -23,10 +23,18 @@ vector<int> encoding(string s1) {
                 p = p + c;
             }
             else {
-                output_code.push_back(table[p]);
-                table[p + c] = code;
-                code++;
-                p = c;
+                // // lzw+
+                // if(c == p){
+                //     table[p+c] = code;
+                //     code++;
+                //     p += c;
+                // }
+                // else{
+                    output_code.push_back(table[p]);
+                    table[p + c] = code;
+                    code++;
+                    p = c;
+                // }
             }
             c = "";
         }
@@ -58,8 +66,14 @@ string decoding(vector<int> op) {
         for(int i = 0; i < op.size() - 1; i++) {
             n = op[i + 1];
             if(table.find(n) == table.end()) {
-                s = table[old];
-                s = s + c;
+                // if(n == old){
+                //     table[count] = table[old] + table[old];
+                //     s = table[old];
+                // }
+                // else{
+                    s = table[old];
+                    s += c;
+                // }
             }
             else {
                 s = table[n];

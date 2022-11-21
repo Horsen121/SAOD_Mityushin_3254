@@ -43,7 +43,7 @@ int main(int argc, char* argv[]){
             input.close();
 
             // create encoded_file
-            fstream output(argv[3]); //, ios_base::binary|ios::out
+            fstream output(argv[3], ios::out); //, ios_base::binary|ios::out
             if(!output.is_open()){
                 cout << "Fatal error! Encoded file don't created." << endl;
                 exit(-1);
