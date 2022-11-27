@@ -1,5 +1,5 @@
 #include <iostream>
-#include "myList.h"
+#include "myList.hpp"
 
 void printList(const MyList<char> &list) {
     for (int i = 0; i < list.Size() - 1; i++)

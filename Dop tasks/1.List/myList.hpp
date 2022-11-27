@@ -1,13 +1,15 @@
 #include <iostream>
+#include <memory>
 #include <string>
-#include "node.h"
+#include "node.hpp"
 
 template <typename Type>
 class MyList {
 private:
-    Node<Type>* pFirst;
+    std::shared_ptr<Node<Type>> pFirst;
 public:
     MyList();
+    ~MyList();
     void PushBack(Type value);
     void PushFront(Type value);
     void Insert(size_t idx, Type value);
@@ -30,18 +32,23 @@ public:
 
 template <typename Type>
 MyList<Type>::MyList() {
-    pFirst = nullptr;
+    pFirst = std::make_shared<Node<Type>>();
+}
+template <typename Type>
+MyList<Type>::~MyList() {
+    this->Clear();
 }
 
 template <typename Type>
 void MyList<Type>::PushBack(Type value) {
-    Node<Type>* newNode = new Node<Type>(value);
+    std::shared_ptr<Node<Type>> newNode = std::make_shared<Node<Type>>();
+    newNode->elem = value;
     if(pFirst == nullptr) {
-        pFirst = newNode;
+        std::shared_ptr<Node<Type>> pFirst(newNode);
         newNode->next = pFirst;
         return;
     }
-    Node<Type>* nodeCurrent = pFirst;
+    std::shared_ptr<Node<Type>> nodeCurrent(pFirst);
     while(nodeCurrent->next != pFirst) {
         nodeCurrent = nodeCurrent->next;
     }
@@ -51,15 +58,16 @@ void MyList<Type>::PushBack(Type value) {
 
 template <typename Type>
 void MyList<Type>::PushFront(Type value) {
-    Node<Type>* newNode = new Node<Type>(value);
+    std::shared_ptr<Node<Type>> newNode = std::make_shared<Node<Type>>();
+    newNode->elem = value;
     if(pFirst == nullptr) {
-        pFirst = newNode;
-        pFirst->next = pFirst;
+        std::shared_ptr<Node<Type>> pFirst(newNode);
+        newNode->next = pFirst;
         return;
     }
     newNode->next = pFirst;
     
-    Node<Type>* nodeCurrent = pFirst;
+    std::shared_ptr<Node<Type>> nodeCurrent(pFirst);
     while(nodeCurrent->next != pFirst) {
         nodeCurrent = nodeCurrent->next;
     }
@@ -74,13 +82,14 @@ void MyList<Type>::Insert(size_t i, Type value) {
         throw std::out_of_range("Index out of range");
         return;
     }
-    Node<Type>* newNode = new Node<Type>(value);
+    std::shared_ptr<Node<Type>> newNode = std::make_shared<Node<Type>>();
+    newNode->elem = value;
     if (i == 0) {
         this->PushFront(value);
         return;
     }
     if (i == this->Size() - 1) {
-        Node<Type>* nodeCurrent = pFirst;
+        std::shared_ptr<Node<Type>> nodeCurrent(pFirst);
         while (nodeCurrent->next != pFirst) {
             nodeCurrent = nodeCurrent->next;
         }
@@ -89,7 +98,7 @@ void MyList<Type>::Insert(size_t i, Type value) {
         return;
     }
     int j = 0;
-    Node<Type>* nodeCurrent = pFirst;
+    std::shared_ptr<Node<Type>> nodeCurrent(pFirst);
     while (j != i - 1) {
         nodeCurrent = nodeCurrent->next;
         j++;
@@ -103,17 +112,15 @@ void MyList<Type>::PopBack() {
     size_t size = this->Size();
     if (size == 0) return;
     if (size == 1) {
-        delete pFirst;
         pFirst = nullptr;
         return;
     }    
-    Node<Type>* nodeCurrent = pFirst;    
+    std::shared_ptr<Node<Type>> nodeCurrent(pFirst);
     int i = 0;
     while (i != size - 2) {
         nodeCurrent = nodeCurrent->next;
         i++;
     }
-    delete nodeCurrent->next;
     nodeCurrent->next = pFirst;
 }
 
@@ -123,19 +130,16 @@ void MyList<Type>::PopFront() {
         return;
     size_t size = this->Size();
     if(size == 1) {
-        delete pFirst;
         pFirst = nullptr;
         return;
     }
 
-    Node<Type>* nodeCurrent = pFirst;
+    std::shared_ptr<Node<Type>> nodeCurrent(pFirst);
     while(nodeCurrent->next != pFirst) {
         nodeCurrent = nodeCurrent->next;
     }
     nodeCurrent->next = pFirst->next;
-    Node<Type>* tmp = pFirst;
     pFirst = pFirst->next;
-    delete tmp;
 }
 
 template <typename Type>
@@ -146,31 +150,26 @@ void MyList<Type>::RemoveAt(size_t i){
         return;
     }
     if (i == 0) {
-        Node<Type>* tmp = pFirst;
-        pFirst = tmp->next;
-        delete tmp;
+        pFirst = pFirst->next;
         return;
     }
     if (i == size - 1) {
         int j = 0;
-        Node<Type>* nodeCurrent = pFirst;
+        std::shared_ptr<Node<Type>> nodeCurrent(pFirst);
         while (j != size - 2) {
             nodeCurrent = nodeCurrent->next;
             j++;
         }
-        delete nodeCurrent->next;
         nodeCurrent->next = pFirst;
         return;
     }
     int j = 0;
-    Node<Type>* nodeCurrent = pFirst;
+    std::shared_ptr<Node<Type>> nodeCurrent(pFirst);
     while (j != i - 1) {
         nodeCurrent = nodeCurrent->next;
         j++;
     }
-    Node<Type>* tmp = nodeCurrent->next;
     nodeCurrent->next = nodeCurrent->next->next;
-    delete tmp;
 }
 
 template <typename Type>
@@ -178,7 +177,7 @@ Type& MyList<Type>::operator[](const size_t index){
     if (index < 0 || index > this->Size() - 1) {
         throw std::out_of_range("Index out of range");
     }
-    Node<Type>* nodeCurrent = pFirst;
+    std::shared_ptr<Node<Type>> nodeCurrent(pFirst);
     size_t i = index;
     while (i--) {
         nodeCurrent = nodeCurrent->next;
@@ -191,7 +190,7 @@ Type const& MyList<Type>::operator[](const size_t index)const{
     if (0 > index || index > this->Size() - 1) {
         throw std::out_of_range("Index out of range");
     }
-    Node<Type>* nodeCurrent = pFirst;
+    std::shared_ptr<Node<Type>> nodeCurrent(pFirst);
     size_t i = index;
     while (i--) {
         nodeCurrent = nodeCurrent->next;
@@ -204,7 +203,7 @@ size_t MyList<Type>::Size()const {
     if(pFirst == nullptr) 
         return 0;
     size_t len = 1;
-    Node<Type>* nodeCurrent = pFirst;
+    std::shared_ptr<Node<Type>> nodeCurrent(pFirst);
     while(nodeCurrent->next != pFirst) {
         len++;
         nodeCurrent = nodeCurrent->next;
@@ -217,7 +216,7 @@ std::string MyList<Type>::tostr() {
     if (pFirst == nullptr) {
         return "List is empty";
     }
-    Node<Type>* nodeCurrent = pFirst;
+    std::shared_ptr<Node<Type>> nodeCurrent(pFirst);
     std::string res;
     while (nodeCurrent->next != nullptr) {
         res += std::to_string(nodeCurrent->elem) + "->";
@@ -236,11 +235,9 @@ template <typename Type>
 void MyList<Type>::Clear() { 
     if(pFirst == nullptr) 
         return;
-    Node<Type>* nodeCurrent = pFirst;
+    std::shared_ptr<Node<Type>> nodeCurrent(pFirst);
     while(nodeCurrent != pFirst) {
-        Node<Type>* tmp = nodeCurrent;
         nodeCurrent = nodeCurrent->next;
-        delete tmp;
     }
     pFirst = nullptr;
 }
@@ -253,7 +250,7 @@ Type MyList<Type>::Front()const {
 template <typename Type>
 Type MyList<Type>::Back()const {
     size_t size = this->Size(), i = 0;
-    Node<Type>* nodeCurrent = pFirst;
+    std::shared_ptr<Node<Type>> nodeCurrent(pFirst);
     while (i != size - 1) {
         nodeCurrent = nodeCurrent->next;
         i++;

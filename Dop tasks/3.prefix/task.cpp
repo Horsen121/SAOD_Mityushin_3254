@@ -41,16 +41,24 @@ int main(int agrc, char* argv[]) {
     std::string word = "wiki";
 
     cout << "umap" << endl;
-    auto time_one = std::chrono::steady_clock::now();
-    umap(text, word);
-    auto time_two = std::chrono::steady_clock::now();
-    cout << "time: " << std::chrono::duration_cast<std::chrono::seconds>(time_two - time_one).count() << " sec" << endl << endl;
+    double sum = 0;
+    for(size_t i = 0; i < 5; i++) {
+        auto time_one = std::chrono::steady_clock::now();
+        umap(text, word);
+        auto time_two = std::chrono::steady_clock::now();
+        sum += std::chrono::duration_cast<std::chrono::seconds>(time_two - time_one).count();
+    }
+    cout << "time: " << sum/5 << " sec" << endl << endl;
 
     cout << "prefix" << endl;
-    time_one = std::chrono::steady_clock::now();
-    Prefix(text, word);
-    time_two = std::chrono::steady_clock::now();
-    cout << "time: " << std::chrono::duration_cast<std::chrono::seconds>(time_two - time_one).count() << " sec" << endl;
+    sum = 0;
+    for(size_t i = 0; i < 5; i++){
+        auto time_one = std::chrono::steady_clock::now();
+        Prefix(text, word);
+        auto time_two = std::chrono::steady_clock::now();
+        sum += std::chrono::duration_cast<std::chrono::seconds>(time_two - time_one).count();
+    }
+    cout << "time: " << sum/5 << " sec" << endl << endl;
 
     return 0;
 }

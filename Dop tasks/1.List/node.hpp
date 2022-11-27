@@ -1,13 +1,13 @@
 #include <iostream>
+#include <memory>
 
 template <typename Type>
 struct Node {
 public:
     Type elem;
-    Node<Type>* next = nullptr;
+    std::shared_ptr<Node<Type>> next;
 
     Node(Type data) {
         this->elem = data;
-        // this->next = nullptr;
     }
 };
