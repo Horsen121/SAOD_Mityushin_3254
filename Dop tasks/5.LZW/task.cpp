@@ -26,7 +26,6 @@ int main(int argc, char* argv[]){
             cout << "Fatal error! Wrong number of parameters!!!" << endl;
             exit(-1);
         }
-        // if(!fork()){
         auto time_one = chrono::high_resolution_clock::now();
 
         // open input_file
@@ -43,8 +42,9 @@ int main(int argc, char* argv[]){
 
         size_t maxv = *std::max_element(res.begin(), res.end());
         size_t mask_size = 0;
-        for(mask_size; maxv >= pow(2, mask_size); mask_size++){}
-        mask_size++;
+        for(mask_size; maxv >= pow(2, mask_size);){
+            mask_size++;
+        }
 
         // create encoded_file
         fstream output(argv[3], ios_base::binary); //, ios_base::binary|ios::out
@@ -62,10 +62,28 @@ int main(int argc, char* argv[]){
 			bitstr += b.to_string().substr(1024-mask_size, mask_size);
 		}
 
-		while(bitstr.size() % 8 != 0)
+        size_t nulcount = 0;
+		while(bitstr.size() % 8 != 0){
+            nulcount++;
 			bitstr.push_back('0');
-		for(size_t i = 0; i < bitstr.size(); i+=8)
-		{
+        }
+
+        std::string meta;
+        vector<ulong> metav = {nulcount, mask_size, ']'};
+        for(const auto & v : metav) {
+			std::bitset<10> b(v);
+			meta += b.to_string();
+		}
+
+        for (size_t i = 0; i < meta.size(); i++){
+            std::bitset<8> b;
+            std::string ss = meta.substr(i, 8);
+            for(int j = 0; j < 8; j++)
+                b[j] = ss[7-j] == '0' ? 0 : 1;
+            output << static_cast<char>(b.to_ulong());
+        }
+        
+		for(size_t i = 0; i < bitstr.size(); i+=8) {
 			std::bitset<8> b;
 			std::string ss = bitstr.substr(i, 8);
 			for(int j = 0; j < 8; j++)
@@ -96,8 +114,10 @@ int main(int argc, char* argv[]){
         }
 
         // read encoded code
-        vector<int> code((istream_iterator<int>(encoded)), istream_iterator<int>());
-        
+        // vector<int> code((istream_iterator<int>(encoded)), istream_iterator<int>());
+        string tmp;
+        vector<int> code;
+
         string res = decoding(code);
         encoded.close();
         // create check_file
@@ -111,7 +131,7 @@ int main(int argc, char* argv[]){
         
         check.close();
         auto time_two = chrono::high_resolution_clock::now();
-        size_t time = chrono::duration_cast<chrono::milliseconds>(time_two - time_one).count();
+        size_t time = chrono::duration_cast<chrono::seconds>(time_two - time_one).count();
         cout << "Done!" << endl;
         cout << "Decompression time: " << time << " sec" << endl;
     }
