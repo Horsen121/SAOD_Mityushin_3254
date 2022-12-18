@@ -6,6 +6,19 @@
 #include <chrono>
 #include "lzw.hpp"
 
+
+void Convert(std::vector<int>& arr, char* val){
+    int len =  strlen(val);
+    int res = 0;
+
+    for(size_t i = 0; i < len; i++) {
+        if(val[i] == '1')
+            res += pow(2, i);
+    }
+    
+    arr.push_back(res);
+}
+
 int main(int argc, char* argv[]){
     using std::cout;
     using std::endl;
@@ -29,16 +42,20 @@ int main(int argc, char* argv[]){
         auto time_one = chrono::high_resolution_clock::now();
 
         // open input_file
-        ifstream input(argv[2]); //, ios_base::in
+        ifstream input(argv[2], ios_base::in); //, ios_base::in
         if(!input.is_open()){
             cout << "Fatal error! Input file don't opened." << endl;
             exit(-1);
         }
 
-        string text;
-        input >> text;
-        vector<int> res = encoding(text);
+        string text, tmp;
+        while(!input.eof()){
+            input >> tmp;
+            text.append(tmp + " ");
+        }
         input.close();
+
+        vector<int> res = encoding(text);
 
         size_t maxv = *std::max_element(res.begin(), res.end());
         size_t mask_size = 0;
@@ -47,7 +64,7 @@ int main(int argc, char* argv[]){
         }
 
         // create encoded_file
-        fstream output(argv[3], ios_base::binary); //, ios_base::binary|ios::out
+        fstream output(argv[3], ios_base::binary|ios::out); //, ios_base::binary|ios::out
         if(!output.is_open()){
             cout << "Fatal error! Encoded file don't created." << endl;
             exit(-1);
@@ -69,25 +86,34 @@ int main(int argc, char* argv[]){
         }
 
         std::string meta;
-        vector<ulong> metav = {nulcount, mask_size, ']'};
+        vector<ulong> metav = {nulcount, mask_size, res.size()};
         for(const auto & v : metav) {
-			std::bitset<10> b(v);
+			std::bitset<8> b(v);
 			meta += b.to_string();
 		}
+        // std::bitset<32> b(res.size());
+		// meta += b.to_string();
 
-        for (size_t i = 0; i < meta.size(); i++){
+        cout << mask_size << " " << res.size() << endl;
+
+        for(size_t i = 0; i < meta.size()-1; i+=8) {
             std::bitset<8> b;
             std::string ss = meta.substr(i, 8);
             for(int j = 0; j < 8; j++)
-                b[j] = ss[7-j] == '0' ? 0 : 1;
+                b[j] = ss[j] == '0' ? 0 : 1;
             output << static_cast<char>(b.to_ulong());
         }
+        // std::bitset<32> b;
+        // std::string ss = meta.substr(16, 32);
+        // for(int j = 0; j < 32; j++)
+        //     b[j] = ss[j] == '0' ? 0 : 1;
+        // output << static_cast<char>(b.to_ulong());
         
 		for(size_t i = 0; i < bitstr.size(); i+=8) {
 			std::bitset<8> b;
 			std::string ss = bitstr.substr(i, 8);
 			for(int j = 0; j < 8; j++)
-				b[j] = ss[7-j] == '0' ? 0 : 1;
+				b[j] = ss[j] == '0' ? 0 : 1;
 			output << static_cast<char>(b.to_ulong());
 		}
         
@@ -107,21 +133,34 @@ int main(int argc, char* argv[]){
         auto time_one = chrono::high_resolution_clock::now();
 
         // open encoded_file
-        fstream encoded(argv[2], ios_base::binary); //, ios_base::binary|ios::in
-        if(!encoded.is_open()){
-            cout << "Fatal error! Input file don't opened." << endl;
-            exit(-1);
+        FILE * encoded;
+        encoded = fopen(argv[2], "rb");
+        std::bitset<8> con, mask;
+        std::bitset<32> count;
+        vector<int> code, meta;
+
+        fread(&con, 8, 1, encoded);
+        fread(&mask, 8, 1, encoded);
+        fread(&count, 32, 1, encoded);
+
+        Convert(meta, con.to_string().data());
+        Convert(meta, mask.to_string().data());
+        Convert(meta, count.to_string().data());
+        cout << con.to_string() << " " << mask.to_string() << " " << count.to_string() << endl;
+        cout << meta[0] << " " << meta[1] << " " << meta[2] << endl;
+
+        int length = meta[1], fcount = meta[2];
+        for(int i=0; i < fcount; i++) {
+            std::bitset<16> tmp;
+            fread(&tmp, length, 1, encoded);
+            Convert(code, tmp.to_string().data());
+            cout << code[i] << endl;
         }
-
-        // read encoded code
-        // vector<int> code((istream_iterator<int>(encoded)), istream_iterator<int>());
-        string tmp;
-        vector<int> code;
-
+        fclose(encoded);
         string res = decoding(code);
-        encoded.close();
-        // create check_file
-        ofstream check(argv[3]); //, ios_base::out
+
+        // // create check_file
+        ofstream check(argv[3], ios_base::out); //, ios_base::out
         if(!check.is_open()){
             cout << "Fatal error! Encoded file don't created." << endl;
             exit(-1);
